@@ -47,8 +47,8 @@ Consider the following code,
  2.     return n + m;
  3. }
  4. int mult(int m, int n){
- 5.     int res = 0, t = 5;
- 6.     for(int i = 0; i < n; i++){
+ 5.     int res = 0, t = 5, x = m * n;
+ 6.     while(res != x){
  7.         res = res + m;
  8.     }
  9.     return res;
@@ -81,24 +81,24 @@ our goal is to remove those from the module (_i.e._, file).
 For this part of the assignment, we will do more micro level optimization. In particular, we will eliminate any instruction
 which generates/defined a value that is never used. Consider the following IR code. 
 ```asm
- 1. define dso_local i32 @main() #0 {
+ 1. define dso_local i32 @mult(i32 %m, i32 %n) #0 {
  2. entry:
- 3.   %0 = load i32, i32* @x, align 4
- 4.   call void @foo(i32 %0)
- 5.   %1 = load i32, i32* @x, align 4
- 6.   %cmp = icmp eq i32 %1, 1
- 7.   br i1 %cmp, label %if.then, label %if.end
- 8. if.then:      
- 9.   %2 = load i32, i32* @g, align 4
-10.   br label %if.end
-11. if.end:      
-12.   %3 = load i32, i32* @x, align 4
-13.   %4 = load i32, i32* @h, align 4
-14.   ret i32 %3
+ 3.   %add = add nsw i32 %m, %n
+ 4.   %mul = mul nsw i32 %m, %n
+ 5.   br label %while.cond
+ 6. while.cond:               
+ 7.   %res.0 = phi i32 [ 0, %entry ], [ %add1, %while.body ]
+ 8.   %cmp = icmp ne i32 %res.0, %mul
+ 9.   br i1 %cmp, label %while.body, label %while.end
+10. while.body:                                      
+11.   %add1 = add nsw i32 %res.0, %m
+12.   br label %while.cond
+13. while.end:                
+14.   ret i32 %res.0
 15. }
 ``` 
-Note that, in the code above, there is no control path that used `%2` or `%4`. 
-Thus, the instructions that defined those values (line 9 for `%2`, and line 13 for `%4`) do not 
+Note that, in the code above, there is no control path that used `%add`. 
+Thus, the instructions that defined that value (line 3) do not 
 have any impact on the code. We can safely remove such instruction. 
 Our goal in this assignment is to remove such instructions. To analyze whether a defined value is used
 later in the code, you can revisit the concept of `LIVE_IN`/`LIVE_OUT`  set from the Programmins Assignment - 5.
