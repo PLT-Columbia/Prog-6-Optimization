@@ -16,23 +16,19 @@ entry:
 define dso_local i32 @mult(i32 %m, i32 %n) #0 {
 entry:
   %add = add nsw i32 %m, %n
-  br label %for.cond
+  %mul = mul nsw i32 %m, %n
+  br label %while.cond
 
-for.cond:                                         ; preds = %for.inc, %entry
-  %res.0 = phi i32 [ 0, %entry ], [ %add1, %for.inc ]
-  %i.0 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]
-  %cmp = icmp slt i32 %i.0, %n
-  br i1 %cmp, label %for.body, label %for.end
+while.cond:                                       ; preds = %while.body, %entry
+  %res.0 = phi i32 [ 0, %entry ], [ %add1, %while.body ]
+  %cmp = icmp ne i32 %res.0, %mul
+  br i1 %cmp, label %while.body, label %while.end
 
-for.body:                                         ; preds = %for.cond
+while.body:                                       ; preds = %while.cond
   %add1 = add nsw i32 %res.0, %m
-  br label %for.inc
+  br label %while.cond
 
-for.inc:                                          ; preds = %for.body
-  %inc = add nsw i32 %i.0, 1
-  br label %for.cond
-
-for.end:                                          ; preds = %for.cond
+while.end:                                        ; preds = %while.cond
   ret i32 %res.0
 }
 

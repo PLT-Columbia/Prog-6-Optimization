@@ -4,8 +4,8 @@
      return n + m;
  }
  int mult(int m, int n){
-     int res = 0, t = m + n;
-     for(int i = 0; i < n; i++){
+     int res = 0, t = m + n, x = m * n;
+     while(res != x){
          res = res + m;
      }
      return res;

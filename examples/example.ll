@@ -25,7 +25,7 @@ entry:
   %n.addr = alloca i32, align 4
   %res = alloca i32, align 4
   %t = alloca i32, align 4
-  %i = alloca i32, align 4
+  %x = alloca i32, align 4
   store i32 %m, i32* %m.addr, align 4
   store i32 %n, i32* %n.addr, align 4
   store i32 0, i32* %res, align 4
@@ -33,31 +33,28 @@ entry:
   %1 = load i32, i32* %n.addr, align 4
   %add = add nsw i32 %0, %1
   store i32 %add, i32* %t, align 4
-  store i32 0, i32* %i, align 4
-  br label %for.cond
-
-for.cond:                                         ; preds = %for.inc, %entry
-  %2 = load i32, i32* %i, align 4
+  %2 = load i32, i32* %m.addr, align 4
   %3 = load i32, i32* %n.addr, align 4
-  %cmp = icmp slt i32 %2, %3
-  br i1 %cmp, label %for.body, label %for.end
+  %mul = mul nsw i32 %2, %3
+  store i32 %mul, i32* %x, align 4
+  br label %while.cond
 
-for.body:                                         ; preds = %for.cond
+while.cond:                                       ; preds = %while.body, %entry
   %4 = load i32, i32* %res, align 4
-  %5 = load i32, i32* %m.addr, align 4
-  %add1 = add nsw i32 %4, %5
+  %5 = load i32, i32* %x, align 4
+  %cmp = icmp ne i32 %4, %5
+  br i1 %cmp, label %while.body, label %while.end
+
+while.body:                                       ; preds = %while.cond
+  %6 = load i32, i32* %res, align 4
+  %7 = load i32, i32* %m.addr, align 4
+  %add1 = add nsw i32 %6, %7
   store i32 %add1, i32* %res, align 4
-  br label %for.inc
+  br label %while.cond
 
-for.inc:                                          ; preds = %for.body
-  %6 = load i32, i32* %i, align 4
-  %inc = add nsw i32 %6, 1
-  store i32 %inc, i32* %i, align 4
-  br label %for.cond
-
-for.end:                                          ; preds = %for.cond
-  %7 = load i32, i32* %res, align 4
-  ret i32 %7
+while.end:                                        ; preds = %while.cond
+  %8 = load i32, i32* %res, align 4
+  ret i32 %8
 }
 
 ; Function Attrs: noinline nounwind uwtable
