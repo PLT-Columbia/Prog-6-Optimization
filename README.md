@@ -80,7 +80,7 @@ our goal is to remove those from the module (_i.e._, file).
 #### Unused Instructions Elimination.
 For this part of the assignment, we will do more micro level optimization. In particular, we will eliminate any instruction
 which generates/defined a value that is never used. Consider the following IR code. 
-```asm
+```
  1. define dso_local i32 @mult(i32 %m, i32 %n) #0 {
  2. entry:
  3.   %add = add nsw i32 %m, %n
