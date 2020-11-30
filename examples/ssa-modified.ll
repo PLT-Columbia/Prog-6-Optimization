@@ -6,54 +6,22 @@ target triple = "x86_64-unknown-linux-gnu"
 @.str = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind uwtable
-define dso_local i32 @add(i32 %n, i32 %m) #0 {
-entry:
-  %add = add nsw i32 %n, %m
-  ret i32 %add
-}
-
-; Function Attrs: noinline nounwind uwtable
 define dso_local i32 @mult(i32 %m, i32 %n) #0 {
 entry:
-  %add = add nsw i32 %m, %n
-  br label %for.cond
+  %mul = mul nsw i32 %m, %n
+  br label %while.cond
 
-for.cond:                                         ; preds = %for.inc, %entry
-  %res.0 = phi i32 [ 0, %entry ], [ %add1, %for.inc ]
-  %i.0 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]
-  %cmp = icmp slt i32 %i.0, %n
-  br i1 %cmp, label %for.body, label %for.end
+while.cond:                                       ; preds = %while.body, %entry
+  %res.0 = phi i32 [ 0, %entry ], [ %add1, %while.body ]
+  %cmp = icmp ne i32 %res.0, %mul
+  br i1 %cmp, label %while.body, label %while.end
 
-for.body:                                         ; preds = %for.cond
+while.body:                                       ; preds = %while.cond
   %add1 = add nsw i32 %res.0, %m
-  br label %for.inc
+  br label %while.cond
 
-for.inc:                                          ; preds = %for.body
-  %inc = add nsw i32 %i.0, 1
-  br label %for.cond
-
-for.end:                                          ; preds = %for.cond
+while.end:                                        ; preds = %while.cond
   ret i32 %res.0
-}
-
-; Function Attrs: noinline nounwind uwtable
-define dso_local i32 @fact(i32 %n) #0 {
-entry:
-  %cmp = icmp eq i32 %n, 0
-  br i1 %cmp, label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
-  br label %return
-
-if.else:                                          ; preds = %entry
-  %call = call i32 @add(i32 %n, i32 -1)
-  %call1 = call i32 @fact(i32 %call)
-  %call2 = call i32 @mult(i32 %n, i32 %call1)
-  br label %return
-
-return:                                           ; preds = %if.else, %if.then
-  %retval.0 = phi i32 [ 1, %if.then ], [ %call2, %if.else ]
-  ret i32 %retval.0
 }
 
 ; Function Attrs: noinline nounwind uwtable
