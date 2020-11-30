@@ -112,14 +112,14 @@ export PATH="$LLVM_HOME/build/bin:$PATH";
 clang -O0 -Xclang -disable-O0-optnone -emit-llvm -c example.c
 llvm-dis example.bc
 ```
-You will now receive an `example.bc` file, which contains the IR in binary format. You will also see an `example.ll` file, 
+You have now generated an `example.bc` file, which contains the IR in binary format. You will also see an `example.ll` file, 
 which contains the IR in human-readable format.
 
 2. Convert the `example.bc` file to Single Static Assignment format 
 (this is very important for generating suitable input, please do not forget to do this)
 ```
 opt -mem2reg example.bc -o ssa.bc;
-llvm-dis ssa.ll
+llvm-dis ssa.bc
 ```
 this `ssa.ll` file is the input for this assignment.
 
