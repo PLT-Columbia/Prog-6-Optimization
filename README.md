@@ -66,7 +66,7 @@ Often, we want to determine whether or not it is possible for a specific functio
 
 Here, the entry function is `main`. Among the other functions, `fact` and `add` are never executed when starting from `main`. Thus, our objective for this optimization is to remove such functions that are never used or considered *dead* in the code.
 
-To begin identifying dead functions, we need to analyze a [call graph](https://en.wikipedia.org/wiki/Call_graph). A call graph is a graph that shows the relationships among function calls in a program. Every node of a call graph represents a function call, and an edge from a node `A` to a node `B` in the call graph indicates that function `B` is invoked by function `A`, *i.e.*, a function call to `B` is made inside of function `A`'s body.
+To begin identifying dead functions, we need to analyze a [call graph](https://en.wikipedia.org/wiki/Call_graph). A call graph is a graph that shows the relationships among direct function calls in a program. Every node of a call graph represents a function call, and an edge from a node `A` to a node `B` in the call graph indicates that function `B` is invoked by function `A`, *i.e.*, a function call to `B` is made inside of function `A`'s body. Note that analyzing indirect function calls through function pointers requires a more sophisticated analysis technique, so for simplicity, assume that all function calls are direct function calls.
 
 Once we identify all functions that are never called starting from `main`, our objective is to them remove those from the code.
 
