@@ -70,7 +70,9 @@ Here, the entry function is `main`. Among the other functions, `fact` and `add` 
 when you start from `main`. Thus, our goal in this optimization is to remove such functions. 
 
 In order for doing that, we have the analyze the [Call Graph](https://en.wikipedia.org/wiki/Call_graph). 
-A Call Graph shows the interaction between functions in terms of function calls. 
+A Call Graph shows the interaction between functions in (_direct_) terms of function calls. 
+Note that, analyzing indirect function calls through function pointer needs much more sophisticated analysis. 
+For this assignment **we will assume that all function calls are direct function calls.**
 Every node of the Call Graph is a function, and an edge from node `A` to node `B` indicates function `B` is called
 from the body of function `A`.
 
@@ -169,6 +171,12 @@ to remove all such unused function. Note that, our definition of **Unused** _doe
 not called from anywhere in the code. It simply mean a function is not reachable from `main`. Thus, while
 removing a function, make sure to update any possible call site of an unused function. Given this hint, 
 you have to research for suitable api for doing the job.
+
+#### Brain Teaser
+We also did function call based analysis in AST (Programming Assignment 2). Part1, and part 2 of this assignment can 
+be easily done with AST analysis (in the frontend). What is the pros and cons of doing this analysis 
+in the compiler backend? In another word, what benifit does it add whe we do this analysis/transformation on LLVM/IR
+in contrast to program AST? 
 
 ### Task-3. Identification of Unused instruction (25 point)
 Once we remove all unused functions, we analyze the body of function to identify which instructions are used
