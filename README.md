@@ -18,70 +18,61 @@ Instructor: Prof. Baishakhi Ray
 
 From this assignment:
 
-1. You **will learn** how to write **Transformation Pass** and **Module Pass** in LLVM.
-2. You **will learn** how to use **Control Flow Analysis based optimization**. 
-3. You **will learn** how to use **Data Flow Analysis based optimization**. 
+1. You **will learn** how to write a **Transformation Pass** and a **Module Pass** in LLVM.
+2. You **will learn** how to apply **optimizations for control flow analysis**.
+3. You **will learn** how to apply **optimizations for data flow analysis**. 
 
 ## Grading Breakdown
-* Identification of Unreachable Function - 50
-* Removal of Unreachable Functions - 25
-* Identification of Unused instruction - 25
+* **Task 1 (Identification of Dead Functions)**: 50
+* **Task 2 (Removal of Dead Functions)**: 25
+* **Task 3 (Identification of Dead Instructions)**: 25
 
 
 ## Assignment
 
-In class, and in the previous programming assignments, we learned control flow analysis, and data flow analysis. 
-In this assignment,  we will use such analyses for optimizing code. In particular, in this assignment, 
-we want to remove unnecessary code from a IR file. We divide the assignment in 2 parts,
+In class and in previous programming assignments, we learned about control flow analysis and data flow analysis. In this assignment, we will use such analysis techniques to optimize code. Particularly in this assignment, we want to remove unnecessary code from an IR. We divide the assignment into two parts:
 
-1. Unused Functions Elimination.
-2. Unused Instructions Elimination.
+1. Dead function elimination
+2. Dead instruction elimination
 
-#### Unused function elimination.
-We have to determine whether there is a possibility of a function to be **executed** in the code. 
-In order for doing that, we assume that every code will have an entry function (typically in c it is `main`). 
-Consider the following code, 
+### Background
+
+#### Dead Function Elimination
+Often, we want to determine whether or not it is possible for a specific function to be **executed** in the code. In order to do that, we must first assume that every program will have an entry function (in C, this is typically `main`). Consider the following program:
 
 ```c++
- 1. int add(int n, int m){
+ 1. int add(int n, int m) {
  2.     return n + m;
  3. }
- 4. int mult(int m, int n){
+ 4. int mult(int m, int n) {
  5.     int res = 0, t = 5, x = m * n;
- 6.     while(res != x){
+ 6.     while(res != x) {
  7.         res = res + m;
  8.     }
  9.     return res;
 10. }
-11. int fact(int n){
+11. int fact(int n) {
 12.     if (n == 0) return 1;
 13.     else {
 14.         return mult(n, fact(add(n, -1)));
 15.     }
 16. }
-17. int main(){
+17. int main() {
 18.     int n = 9, m = 8;
 19.     print(mult(m, n));
 20.     return 0;
 21. }
 ```  
 
-Here, the entry function is `main`. Among the other functions, `fact` and `add` are never executed, 
-when you start from `main`. Thus, our goal in this optimization is to remove such functions. 
+Here, the entry function is `main`. Among the other functions, `fact` and `add` are never executed when starting from `main`. Thus, our objective for this optimization is to remove such functions that are never used or considered *dead* in the code.
 
-In order for doing that, we have the analyze the [Call Graph](https://en.wikipedia.org/wiki/Call_graph). 
-A Call Graph shows the interaction between functions in (_direct_) terms of function calls. 
-Note that, analyzing indirect function calls through function pointer needs much more sophisticated analysis. 
-For this assignment **we will assume that all function calls are direct function calls.**
-Every node of the Call Graph is a function, and an edge from node `A` to node `B` indicates function `B` is called
-from the body of function `A`.
+To begin identifying dead functions, we need to analyze a [call graph](https://en.wikipedia.org/wiki/Call_graph). A call graph is a graph that shows the relationships among function calls in a program. Every node of a call graph represents a function call, and an edge from a node `A` to a node `B` in the call graph indicates that function `B` is invoked by function `A`, *i.e.*, a function call to `B` is made inside of function `A`'s body.
 
-Once we find out all such functions that are never called starting from `main`, 
-our goal is to remove those from the module (_i.e._, file).
+Once we identify all functions that are never called starting from `main`, our objective is to them remove those from the code.
 
-#### Unused Instructions Elimination.
-For this part of the assignment, we will do more micro level optimization. In particular, we will eliminate any instruction
-which generates/defined a value that is never used. Consider the following IR code. 
+#### Dead Instruction Elimination
+For this part of the assignment, we will do more micro-level optimization. In particular, we will eliminate any instructions that define variables that are never used later; we refer to such instructions as *dead* instructions (No surprises!). Consider the following IR code:
+
 ```ll
  1. define dso_local i32 @mult(i32 %m, i32 %n) #0 {
  2. entry:
@@ -95,19 +86,17 @@ which generates/defined a value that is never used. Consider the following IR co
 10. while.body:                                      
 11.   %add1 = add nsw i32 %res.0, %m
 12.   br label %while.cond
-13. while.end:                
+13. while.end:
 14.   ret i32 %res.0
 15. }
 ``` 
-Note that, in the code above, there is no control path that used `%add`. 
-Thus, the instructions that defined that value (line 3) do not 
-have any impact on the code. We can safely remove such instruction. 
-Our goal in this assignment is to remove such instructions. To analyze whether a defined value is used
-later in the code, you can revisit the concept of `LIVE_IN`/`LIVE_OUT`  set from the Programmins Assignment - 5.
+Note that, in the code above, there is no control path that uses `%add`. Thus, the instruction that defined `%add` (line 3) does not have any impact on the rest of the code. This instruction is an example of a dead instruction, and we can safely remove it from our IR. As you can imagine with dead funcitons, our objective for this optimization is to remove such instructions. *Hint: to analyze whether a defined variable is used later in the code, you can revisit the concepts of `LIVE_IN`/`LIVE_OUT` sets from Programming Assignment 5.*
+
 
 ### Getting Started
 
 1. Convert the `example.c` C program (from the `examples` directory) to an IR by running the following, just as you did in the previous assignment:
+
 ```
 export LLVM_HOME="<the absolute path to llvm-project>";
 export PATH="$LLVM_HOME/build/bin:$PATH";
@@ -115,19 +104,18 @@ export PATH="$LLVM_HOME/build/bin:$PATH";
 clang -O0 -Xclang -disable-O0-optnone -emit-llvm -c example.c
 llvm-dis example.bc
 ```
-You have now generated an `example.bc` file, which contains the IR in binary format. You will also see an `example.ll` file, 
-which contains the IR in human-readable format.
+You have now generated an `example.bc` file, which contains the IR in binary format. You will also see an `example.ll` file, which contains the IR in human-readable format.
 
-2. Convert the `example.bc` file to Single Static Assignment format 
-(this is very important for generating suitable input, please do not forget to do this)
+2. Convert the `example.bc` file to single static assignment form (this is very important for generating suitable inputs, so please do not forget to perform this step):
+
 ```
 opt -mem2reg example.bc -o ssa.bc;
 llvm-dis ssa.bc
 ```
-this `ssa.ll` file is the input for this assignment.
 
-3. Create a directory `clang-hw6` in `$LLVM_HOME/llvm/lib/Transforms` for this assignment, 
-and copy the files from the `src` directory to this new directory, as follows:
+Note that the `ssa.ll` file that is created will be the input for this assignment.
+
+3. Create a directory `clang-hw6` in `$LLVM_HOME/llvm/lib/Transforms` for this assignment, and copy the files from the `src` directory to this new directory, as follows:
 
 ```
 cp -r ./src/* "$LLVM_HOME/llvm/lib/Transforms/clang-hw6/"
@@ -135,7 +123,7 @@ cp -r ./src/* "$LLVM_HOME/llvm/lib/Transforms/clang-hw6/"
 
 4. Append `add_subdirectory(clang-hw6)` to the `$LLVM_HOME/llvm/lib/Transforms/CMakeLists.txt` file.
 
-5. Build `clang-hw6` by running the following commands (you should do this every time you make changes):
+5. Build `clang-hw6` by running the following commands:
 
 ```
 cd "$LLVM_HOME/build"
@@ -144,67 +132,35 @@ make
 
 After you successfully run `make` once, you can rebuild the project using `make LLVMOptimizer`.
 
-6. Whenever you are running the pass for this assignment,
+6. Whenever you are running the pass for this assignment, please run the following command:
+
 ```
-opt -load $LLVM_HOME/build/lib/LLVMOptimizer.so -optimize  ssa.bc
+opt -load $LLVM_HOME/build/lib/LLVMOptimizer.so -optimize ssa.bc
 ```
-Read through the output you can see in the terminal for additional hints. Also look at different 
-files generated by the pass. 
 
-We are implementing a [`ModulePass`](https://llvm.org/doxygen/classllvm_1_1ModulePass.html)
-for this assignment. [`runOnModule`](src/hw6-optimizer.cpp#L95) is the entry point for the pass. 
-In that function, we extracted a [`vector` of all the function](src/hw6-optimizer.cpp#L97-L100), 
-the [`Call graph`](src/hw6-optimizer.cpp#L101), and [the entry function](src/hw6-optimizer.cpp#L103). 
-We also have taken care of all the inputs and outputs. 
-2.  
+Read through the output you see in the terminal for additional hints. Additionally, take a look at the different files generated by the pass. 
 
-### Task-1. Identification of Unreachable Function (50 points)
-In this task, you have to implement the [`getUnusedFunction`](src/hw6-optimizer.cpp#L67), and return a vector
-of `Function *` denoting the unused function (_i.e._ functions that are not reachable from main). 
-The function takes a `vector<Function *>` containing all functions in the module, 
-`map<Function *, vector<Function *>>` containing the call graph, and a `Function *` indication the pointer to
-entry function. The `TODO` comment also summarizes what is to be done.
+We are implementing a [`ModulePass`](https://llvm.org/doxygen/classllvm_1_1ModulePass.html) in this assignment. [`runOnModule`](src/hw6-optimizer.cpp#L95) is the entry point for the pass, much like `runOnFunction` was the entry point for the `FunctionPass`. In `runOnModule` function, we extracted for you a [`vector` of all the functions](src/hw6-optimizer.cpp#L97-L100), the [`call graph`](src/hw6-optimizer.cpp#L101), and [the entry function](src/hw6-optimizer.cpp#L103). We have also taken care of all the inputs and outputs.
 
-### Task-2. Removal of Unreachable Functions (25 points)
-Once you find unused functions, you need to implement [`removeUnusedFunctions`](src/hw6-optimizer.cpp#L81) 
-to remove all such unused function. Note that, our definition of **Unused** _doesn't mean_ a function is 
-not called from anywhere in the code. It simply mean a function is not reachable from `main`. Thus, while
-removing a function, make sure to update any possible call site of an unused function. Given this hint, 
-you have to research for suitable api for doing the job.
+### Task 1: Identification of Dead Functions (50 points)
+In this task, you will implement the [`getUnusedFunction`](src/hw6-optimizer.cpp#L67) function and return a vector of `Function *` denoting the unused/dead functions (_i.e._, functions that are not reachable from `main`). This function takes in a `vector<Function *>` containing all functions in the module, `map<Function *, vector<Function *>>` containing the call graph, and a `Function *` indication the pointer to the entry function. The `TODO` comment also summarizes what needs to be done.
 
-#### Brain Teaser
-We also did function call based analysis in AST (Programming Assignment 2). Part1, and part 2 of this assignment can 
-be easily done with AST analysis (in the frontend). What is the pros and cons of doing this analysis 
-in the compiler backend? In another word, what benifit does it add whe we do this analysis/transformation on LLVM/IR
-in contrast to program AST? 
+### Task 2: Removal of Dead Functions (25 points)
+Once you find all the dead functions, you will implement the [`removeUnusedFunctions`](src/hw6-optimizer.cpp#L81) function to actually perform the removal of all these dead functions. Note that our definition of "dead" _does NOT mean_ a function is not called from anywhere in the code. It simply refers to the fact that a function is not reachable from `main`. Thus, while you are removing a dead function, make sure that you properly update any possible call sites of that function. Given this hint, you will probably need to do some research to find suitable APIs to accomplish this task.
 
-### Task-3. Identification of Unused instruction (25 point)
-Once we remove all unused functions, we analyze the body of function to identify which instructions are used
-which are not according to our definition above. In order for doing that, for every function, we instantiate 
-an analyzer to extract data flow variables (_i.e._ `DEF`, `USE`, `LIVE_IN`, `LIVE_OUT`). 
-We call [`VariableLivenessUtil::removeUnused`](src/dead-instruction-analyzer.cpp#L42) to check and remove any
-unused instructions. Your job for this assignment is to decide whether an instruction should be removed or not.
-You have to implement [`VariableLivenessUtil::isDeadInstruction`](src/dead-instruction-analyzer.cpp#L21) which 
-decides whether an instruction should be removed. You do not have to actually remove the instruction, we had
-already done that for you.  
-Please read through the comments in the code for further instructions and hints.   
+### Task 3: Identification of Dead Instructions (25 points)
+Once we remove all dead functions, you will analyze the body of all remaining functions to identify which instructions are dead. In order to do that, for every function, we instantiate an analyzer to extract data flow variables (_i.e._, `DEF`, `USE`, `LIVE_IN`, and `LIVE_OUT`). We call the [`VariableLivenessUtil::removeUnused`](src/dead-instruction-analyzer.cpp#L42) function to check for and remove any dead instructions. Your task is to decide whether an instruction should or should not be removed.
+
+You will need to implement the [`VariableLivenessUtil::isDeadInstruction`](src/dead-instruction-analyzer.cpp#L21) function, which decides whether an instruction should or should not be removed. You do not have to actually remove the instruction; we have already done that for you. Please read through the comments in the code for further instructions and hints.   
 
 ### Important Notes
 1. Please **DO NOT** remove or modify any of the existing code.
-2. Place all of your code in the sections that we have outlined for you. You may include helper functions 
-as necessary, but please make sure to put them inside [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp), or 
-[`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) file. 
-Keep in mind that we will only use these two files from your submission for grading. 
-3. Carefully read through the steps highlighted in this README, as well as the TODOs and other 
-comments in the code. You will find useful hints.
-4. Once you successfully run the pass, you will see `ssa-modified.ll` file reflecting all your 
-optimization. Compare your original `ssa.ll` and `ssa-modified.ll` file to see the output
-of your first compiler optimization. _Trust me! it feels amazing!_
+2. Place all of your code in the sections that we have outlined for you. You may include helper functions as necessary, but please make sure to put them inside the [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp) or [`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) files as necessary. Keep in mind that we will only use these two files from your submission for grading. 
+3. Carefully read through the steps highlighted in this README, as well as the TODOs and other comments in the code. You will find useful hints.
+4. Once you successfully run the pass, you will notice that the `ssa-modified.ll` file should reflect all of your optimizations. Compare your original `ssa.ll` file with the `ssa-modified.ll` file to see the output of your first compiler optimizations. _Trust me! It feels amazing!_
 
 ## Submission
-We will only consider [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp), and 
-[`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) from your submission. Please make
-sure all the relevant code are **only** in these two files. 
+We will only consider [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp) and [`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) from your submission. Please make sure all relevant code is **only** in these two files. 
 
 ## Piazza
 If you have any questions about this programming assignment, please post them in the Piazza forum for the course, and an instructor will reply to them as soon as possible. Any updates to the assignment itself will be available in Piazza.
