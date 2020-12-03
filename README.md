@@ -90,7 +90,7 @@ For this part of the assignment, we will do more micro-level optimization. In pa
 14.   ret i32 %res.0
 15. }
 ``` 
-Note that, in the code above, there is no control path that uses `%add`. Thus, the instruction that defined `%add` (line 3) does not have any impact on the rest of the code. This instruction is an example of a dead instruction, and we can safely remove it from our IR. As you can imagine with dead funcitons, our objective for this optimization is to remove such instructions. *Hint: to analyze whether a defined variable is used later in the code, you can revisit the concepts of `LIVE_IN`/`LIVE_OUT` sets from Programming Assignment 5.*
+Note that, in the code above, there is no control path that uses `%add`. Thus, the instruction that defined `%add` (line 3) does not have any impact on the rest of the code. This instruction is an example of a dead instruction, and we can safely remove it from our IR. As you can imagine with dead functions, our objective for this optimization is to remove such instructions. *Hint: to analyze whether a defined variable is used later in the code, you can revisit the concepts of `LIVE_IN`/`LIVE_OUT` sets from Programming Assignment 5.*
 
 
 ### Getting Started
@@ -147,6 +147,9 @@ In this task, you will implement the [`getUnusedFunction`](src/hw6-optimizer.cpp
 
 ### Task 2: Removal of Dead Functions (25 points)
 Once you find all the dead functions, you will implement the [`removeUnusedFunctions`](src/hw6-optimizer.cpp#L81) function to actually perform the removal of all these dead functions. Note that our definition of "dead" _does NOT mean_ a function is not called from anywhere in the code. It simply refers to the fact that a function is not reachable from `main`. Thus, while you are removing a dead function, make sure that you properly update any possible call sites of that function. Given this hint, you will probably need to do some research to find suitable APIs to accomplish this task.
+
+#### Brain Teaser
+We also did analysis of ASTs based on function calls back in Programming Assignment 2. Tasks 1 and 2 can easily be done with AST analysis (in the front-end). What are the pros and cons of doing this analysis in the compiler back-end? In other words, what benefit does performing the analysis/transformation on the LLVM IR provide in comparison to the analysis on the AST?
 
 ### Task 3: Identification of Dead Instructions (25 points)
 Once we remove all dead functions, you will analyze the body of all remaining functions to identify which instructions are dead. In order to do that, for every function, we instantiate an analyzer to extract data flow variables (_i.e._, `DEF`, `USE`, `LIVE_IN`, and `LIVE_OUT`). We call the [`VariableLivenessUtil::removeUnused`](src/dead-instruction-analyzer.cpp#L42) function to check for and remove any dead instructions. Your task is to decide whether an instruction should or should not be removed.
