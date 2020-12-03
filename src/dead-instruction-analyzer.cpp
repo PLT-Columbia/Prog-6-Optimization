@@ -26,7 +26,8 @@ bool VariableLivenessUtil::isDeadInstruction(Instruction* &inst) {
   bool deadInstruction = false;
   /*
    * TODO: Analyze whether an instruction (given by Instruction* inst)
-   * Is dead or not. A Dead instruction defines a value which no one else uses.
+   *       is dead or not. A dead instruction defines a variable that is
+   *       not used by any other part of the code.
    */
 
   return deadInstruction;
@@ -34,10 +35,10 @@ bool VariableLivenessUtil::isDeadInstruction(Instruction* &inst) {
 
 /*
  * We call this function to analyze whether any instruction in a function is
- * Dead of not. We collect all such instructions and remove them from their
- * Parent. Note that, since these instructions are defining values that no
- * one else going to use, we DO NOT have to update the uses
- * (in fact, there is none).
+ * dead or not. We collect all such instructions and remove them from their
+ * parent. Note that, since these instructions are defining variables that 
+ * are unused by any other part of the code, we DO NOT have to update the
+ * uses (in fact, there are none).
  */
 void VariableLivenessUtil::removeUnused(OptimizationResultWriter &writer) {
   vector<Instruction *> deadInstructions;
