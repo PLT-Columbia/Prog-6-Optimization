@@ -163,7 +163,7 @@ You will need to implement the [`VariableLivenessUtil::isDeadInstruction`](src/d
 4. Once you successfully run the pass, you will notice that the `ssa-modified.ll` file should reflect all of your optimizations. Compare your original `ssa.ll` file with the `ssa-modified.ll` file to see the output of your first compiler optimizations. _Trust me! It feels amazing!_
 
 ## Submission
-We will only consider [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp) and [`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) from your submission. Please make sure all relevant code is **only** in these two files. 
+We will only consider [`src/hw6-optimizer.cpp`](src/hw6-optimizer.cpp) and [`src/dead-instruction-analyzer.cpp`](src/dead-instruction-analyzer.cpp) from your submission. Please make sure all relevant code is **only** in these two files. Make sure to properly commit your code and push it to the `main` branch.
 
 ## Piazza
 If you have any questions about this programming assignment, please post them in the Piazza forum for the course, and an instructor will reply to them as soon as possible. Any updates to the assignment itself will be available in Piazza.
