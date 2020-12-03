@@ -104,7 +104,7 @@ struct HW6Optimizer : public ModulePass {
     if (entryFunction != nullptr) {
       vector<Function *> deadFunctions =
           getDeadFunctions(allFunctions, callGraph, entryFunction);
-      writer.printUnusedFunctions(deadFunctions);
+      writer.printDeadFunctions(deadFunctions);
       removeDeadFunctions(M, deadFunctions);
       for (auto function : allFunctions) {
         if (std::find(deadFunctions.begin(), deadFunctions.end(),
