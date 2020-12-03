@@ -40,14 +40,3 @@ public:
         return *this;
     }
 };
-
-//#include <iostream>
-//#include <fstream>
-//using namespace std;
-//
-//int main() {
-//    fstream f("test.txt", ios::out | ios::trunc);
-//    Tee<ostream&, ostream&, ostream&, fstream&> tee(cout, cerr, cout, f);
-//    tee << "sdfsdf\n";
-//    return 0;
-//}
