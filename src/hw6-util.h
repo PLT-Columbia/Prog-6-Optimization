@@ -76,10 +76,11 @@ public:
     }
   }
 
-  void printUnusedFunctions(vector<Function *> &unused) {
+  void printDeadFunctions(vector<Function *> &deadFunctions) {
     tee << "=============================================================\n";
-    tee << "Printing Unused Functions\n";
-    for (auto func : unused) {
+    tee << "Printing Dead Functions\n";
+    tee << "-------------------------------------------------------------\n\n";
+    for (auto func : deadFunctions) {
       tee << func->getName().str() << "\n";
     }
     tee << "=============================================================\n";
@@ -90,6 +91,7 @@ public:
                                std::ios::out | std::ios::trunc);
     cout << "=============================================================\n";
     cout << "Printing Call Graph\n";
+    cout << "-------------------------------------------------------------\n\n";
     Tee<std::fstream &, std::ostream &> callGraphTee(callGraphFile, std::cout);
     callGraphTee << "digraph " << moduleName << "{\n";
     for (auto graphList : callGraph) {
@@ -100,10 +102,9 @@ public:
     }
     callGraphTee << "}\n";
     callGraphFile.close();
-    cout << "Call Graph Printed to : " << moduleName + ".dot\n";
-    cout << "Run the following command to generate pdf\n";
-    cout << "\t\"dot -Tpdf " << moduleName + ".dot -o "
-         << moduleName + ".pdf\"\n";
+    cout << "Call graph printed to: " << moduleName + ".dot\n";
+    cout << "Run the following command to generate the PDF:\n";
+    cout << "\t\"dot -Tpdf " << moduleName + ".dot -o " << moduleName + ".pdf\"\n";
     cout << "=============================================================\n";
   }
 
@@ -118,17 +119,17 @@ public:
     modifiedModuleFile.close();
   }
 
-  void printUnusedInstruction(Function *function, Instruction* unusedInstr) {
-    tee << "Unused Instruction in " << function->getName().str() << "\t";
-    tee << instructionToString(unusedInstr) << "\n";
+  void printDeadInstruction(Function *function, Instruction* deadInstruction) {
+    tee << "Dead instruction in " << function->getName().str() << ":\t";
+    tee << instructionToString(deadInstruction) << "\n";
   }
 
-  void printUnusedInstruction(Function *function, vector<Instruction*> unusedInstr) {
+  void printDeadInstructions(Function *function, vector<Instruction*> deadInstructions) {
     tee << "=============================================================\n";
-    tee << "Unused Instruction in " << function->getName().str() << "\n";
-    tee << "-------------------------------------------------------------\n";
-    for(auto instr : unusedInstr) {
-      tee << instructionToString(instr) << "\n";
+    tee << "Dead Instructions in " << function->getName().str() << "\n";
+    tee << "-------------------------------------------------------------\n\n";
+    for(auto deadInstruction : deadInstructions) {
+      tee << instructionToString(deadInstruction) << "\n";
     }
     tee << "=============================================================\n";
   }
