@@ -109,7 +109,7 @@ You have now generated an `example.bc` file, which contains the IR in binary for
 2. Convert the `example.bc` file to single static assignment form (this is very important for generating suitable inputs, so please do not forget to perform this step):
 
 ```
-opt -mem2reg example.bc -o ssa.bc;
+opt -mem2reg example.bc -o ssa.bc
 llvm-dis ssa.bc
 ```
 
