@@ -60,7 +60,8 @@ public:
         }
       }
       use[pI] = s2;
-      // handle PHI NODE
+      
+      // Handle Phi nodes
       if (isa<PHINode>(pI)) {
         PHINode *phiInstruction = dyn_cast<PHINode>(pI);
         map<BasicBlock *, set<Value *>> tempUseMap;
