@@ -40,7 +40,7 @@ bool VariableLivenessUtil::isDeadInstruction(Instruction* &inst) {
  * are unused by any other part of the code, we DO NOT have to update the
  * uses (in fact, there are none).
  */
-void VariableLivenessUtil::removeUnused(OptimizationResultWriter &writer) {
+void VariableLivenessUtil::removeDeadInstructions(OptimizationResultWriter &writer) {
   vector<Instruction *> deadInstructions;
   for(auto ins_it = inst_begin(function); ins_it != inst_end(function); ins_it++){
       Instruction *instPtr = &(*ins_it);
