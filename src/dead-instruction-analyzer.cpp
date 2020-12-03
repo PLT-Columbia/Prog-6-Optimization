@@ -52,7 +52,7 @@ void VariableLivenessUtil::removeDeadInstructions(OptimizationResultWriter &writ
       }
   }
   if(!deadInstructions.empty()) {
-    writer.printUnusedInstruction(function, deadInstructions);
+    writer.printDeadInstructions(function, deadInstructions);
     for (auto instr : deadInstructions) {
       instr->eraseFromParent();
     }
