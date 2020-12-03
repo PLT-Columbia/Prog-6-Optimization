@@ -22,8 +22,8 @@ struct HW6Optimizer : public ModulePass {
   HW6Optimizer() : ModulePass(ID) {}
 
   /*
-   * We are assuming that "main" function is the entry point of a module.
-   * This functions extracts the function pointer that is named "main".
+   * We are assuming that the "main" function is the entry point of a module.
+   * This function extracts the function pointer from the function named "main."
    */
   Function *extractEntryFunction(vector<Function *> &allFunctions) {
     for (auto function : allFunctions) {
@@ -61,33 +61,33 @@ struct HW6Optimizer : public ModulePass {
 
 
   /*
-   * Extract list of unused functions, given the callGraph and
+   * Extract list of dead functions, given the callGraph and
    * the Function * entryFunction.
    */
-  vector<Function *> getUnusedFunction(vector<Function *> &allFunctions,
+  vector<Function *> getDeadFunctions(vector<Function *> &allFunctions,
                     map<Function *, vector<Function *>> &callGraph,
                     Function *entryFunction) {
-    vector<Function *> unused;
+    vector<Function *> dead;
     /*
-     * TODO : Extract the unused functions. If a function is unreachable from
-     * The entryFunction, that function will be deemed unused.
-     * You have to extract all such unused functions and put those in the
-     * Vector `unused`.
+     * TODO: extract the dead functions. If a function is unreachable from
+     *       the entryFunction, that function will be deemed dead. You have 
+     *       to extract all such unused functions and put those in the 
+     *       vector `dead`.
      */
 
-    return unused;
+    return dead;
   }
 
-  void removeUnusedFunction(Module &M, vector<Function *> &unusedFunctions) {
+  void removeDeadFunctions(Module &M, vector<Function *> &deadFunctions) {
     /*
-     * TODO: Remove all the unused functions from Module M.
-     * Remember, unused functions are function that cannot be reached from
-     * The entryFunction. That doesn't mean no other function will call one
-     * Of those unused functions. If you do not take necessary
-     * Steps before removing such a function, your optimizer might crash.
-     * TAs will provide no further hint about what necessary steps you should
-     * Take and how to remove a function. You should do research on necessary
-     * APIs for implementing this function.
+     * TODO: remove all the dead functions from Module M.
+     *       Remember, dead functions are functions that cannot be reached from
+     *       the entryFunction. That doesn't mean that other functions cannot call
+     *       such functions. If you don't take necessary steps before removing such 
+     *       functions, your optimizer might crash. TAs will not provide any further 
+     *       hints about what necessary steps you should take or how to remove these
+     *       functions, especially since this is extra credit. You should do your own
+     *       research on necessary APIs for implementing this function.
      */
 
   }
@@ -102,13 +102,13 @@ struct HW6Optimizer : public ModulePass {
     writer.printCallGraph(callGraph);
     Function *entryFunction = extractEntryFunction(allFunctions);
     if (entryFunction != nullptr) {
-      vector<Function *> unusedFunstions =
-          getUnusedFunction(allFunctions, callGraph, entryFunction);
-      writer.printUnusedFunctions(unusedFunstions);
-      removeUnusedFunction(M, unusedFunstions);
+      vector<Function *> deadFunctions =
+          getDeadFunctions(allFunctions, callGraph, entryFunction);
+      writer.printUnusedFunctions(deadFunctions);
+      removeDeadFunctions(M, deadFunctions);
       for (auto function : allFunctions) {
-        if (std::find(unusedFunstions.begin(), unusedFunstions.end(),
-                      function) == unusedFunstions.end()) {
+        if (std::find(deadFunctions.begin(), deadFunctions.end(),
+                      function) == deadFunctions.end()) {
           VariableLivenessUtil instructionAnalyzer(function);
           instructionAnalyzer.removeUnused(writer);
         }
