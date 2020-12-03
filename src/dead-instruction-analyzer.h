@@ -213,7 +213,7 @@ public:
 
   bool isDeadInstruction(Instruction* &inst);
 
-  void removeUnused(OptimizationResultWriter &writer);
+  void removeDeadInstructions(OptimizationResultWriter &writer);
 };
 
 #endif // LLVM_LIVENESS_UTIL_H
