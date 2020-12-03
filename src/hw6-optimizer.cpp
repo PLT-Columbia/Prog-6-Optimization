@@ -110,7 +110,7 @@ struct HW6Optimizer : public ModulePass {
         if (std::find(deadFunctions.begin(), deadFunctions.end(),
                       function) == deadFunctions.end()) {
           VariableLivenessUtil instructionAnalyzer(function);
-          instructionAnalyzer.removeUnused(writer);
+          instructionAnalyzer.removeDeadInstructions(writer);
         }
       }
       writer.writeModifiedModule(M);
